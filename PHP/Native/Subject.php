@@ -61,7 +61,7 @@ class Subject
     /**
      * Register multiple Event Observers at once
      *
-     * @param array[string]callback $observers Associative array whose key represents an Event name and whose value is
+     * @param array                 [string]callback $observers Associative array whose key represents an Event name and whose value is
      *                              an Observer (callback) that will be executed when that Event occurs.
      *
      * @link http://mootools.net/docs/core/Class/Class.Extras#Events:addEvents Analogous MooTools Class Method
@@ -120,15 +120,21 @@ class Subject
      * Conceptually: Send Observers registered for this Event a notification of it's occurrence.
      * Practically: Execute each of the callback functions registered to handle the $event Event
      *
-     * @param string $event     Event name
-     * @param mixed  $eventData data to be broadcasts to Event Observers
+     * NOTE: all parameters passed to this method other than the $event
+     * are applied as input parameters to the event handler (Observer) when it's called.
+     *
+     * @param string $event Event name
      *
      * @return $this
      */
-    public function fireEvent($event, $eventData = null)
+    public function fireEvent($event)
     {
-        foreach ($this->getObservers($event) as $observer) {
-            call_user_func($observer, $eventData);
+        if ($event) {
+            $callbackParameters = func_get_args();
+            array_shift($callbackParameters);
+            foreach ($this->getObservers($event) as $observer) {
+                call_user_func_array($observer, $callbackParameters);
+            }
         }
 
         return $this;
